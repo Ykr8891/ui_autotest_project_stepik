@@ -22,19 +22,18 @@ class ProductPage(BasePage):
         return self.browser.find_element(*ProductPageLocators.MAIN_PRODUCT_PRODUCT_PRICE).text
 
     def added_product_price_equals_basket_price(self, product_price):
-        """
-
-        """
         assert self.is_element_present(*ProductPageLocators.ALERT_PRODUCT_PRICE), "Alert product price element is not presented " \
                                                                                   "in alert section"
         alert_product_price = self.browser.find_element(*ProductPageLocators.ALERT_PRODUCT_PRICE).text
         assert product_price == alert_product_price, f'Main page price {product_price} is nor equal to alert price {alert_product_price}'
 
     def added_product_name_equals_alert_name(self, product_name):
-        """
-
-        """
         assert self.is_element_present(*ProductPageLocators.ALERT_PRODUCT_NAME), "Alert product name element is not presented " \
                                                                                  "in alert section"
-        alert_product_name = self.browser.find_element(*ProductPageLocators.ALERT_PRODUCT_NAME).text
-        assert product_name in alert_product_name, f'Main page name {product_name} is nor equal to alert name {alert_product_name}'
+        alert_product_message = self.browser.find_element(*ProductPageLocators.ALERT_PRODUCT_NAME).text
+
+        # Get substring containing only product name
+        index = alert_product_message.find(' has been added to your basket.')
+        alert_product_name = alert_product_message[0:index]
+
+        assert product_name == alert_product_name, f'Main page name {product_name} is nor equal to alert name {alert_product_name}'
