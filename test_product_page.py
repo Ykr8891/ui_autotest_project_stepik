@@ -8,19 +8,28 @@ from .pages.locators import ProductPageLocators
 from .pages.product_page import ProductPage
 
 
-@pytest.mark.parametrize('link', ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
-                                  pytest.param(
-                                      "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7",
-                                      marks=pytest.mark.xfail(reason="Incorrect alert message")
-                                  ),
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
-                                  "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
+def test_guest_cant_see_success_message(browser):
+    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-shellcoders-handbook_209/?promo=newYear"
+    page = ProductPage(browser, link)
+    page.open()
+    assert page.is_not_element_present(
+        *ProductPageLocators.ALERT_PRODUCT_NAME), 'Success message is presented before adding product to basket'
+
+
+@pytest.mark.parametrize('link',
+                         ["http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer0",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer1",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer2",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer3",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer4",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer5",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer6",
+                          pytest.param(
+                              "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer7",
+                              marks=pytest.mark.xfail(reason="Incorrect alert message")
+                          ),
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer8",
+                          "http://selenium1py.pythonanywhere.com/catalogue/coders-at-work_207/?promo=offer9"])
 def test_guest_can_add_product_to_basket(browser, link):
     page = ProductPage(browser, link)
     page.open()
@@ -42,13 +51,6 @@ def test_guest_cant_see_success_message_after_adding_product_to_basket(browser):
     page.add_product_to_basket()
     page.solve_quiz_and_get_code()
     assert page.is_not_element_present(*ProductPageLocators.ALERT_PRODUCT_NAME), 'Success message is presented after adding product to basket'
-
-
-def test_guest_cant_see_success_message(browser):
-    link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-shellcoders-handbook_209/?promo=newYear"
-    page = ProductPage(browser, link)
-    page.open()
-    assert page.is_not_element_present(*ProductPageLocators.ALERT_PRODUCT_NAME), 'Success message is presented before adding product to basket'
 
 
 @pytest.mark.xfail(reason='Broken logic')
@@ -84,3 +86,34 @@ def test_guest_cant_see_product_in_basket_opened_from_product_page(browser):
     page.go_to_basket_page()
     assert page.is_not_element_present(By.CLASS_NAME, "basket-items"), "Basket is not empty"
     assert page.is_element_present(By.XPATH, "//*[text()[contains(., 'Your basket is empty.')]]"), '"Your basket is empty" text is not present'
+
+
+class TestUserAddToBasketFromProductPage:
+
+    @pytest.fixture()
+    def setup(self, browser):
+        email = str(time.time()) + "@fakemail.org"
+        link = "http://selenium1py.pythonanywhere.com/"
+        page = LoginPage(browser, link)
+        page.register_new_user(email, "qwerty")
+        page.should_be_authorized_user()
+
+    def test_user_cant_see_success_message(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-shellcoders-handbook_209/?promo=newYear"
+        page = ProductPage(browser, link)
+        page.open()
+        assert page.is_not_element_present(
+            *ProductPageLocators.ALERT_PRODUCT_NAME), 'Success message is presented before adding product to basket'
+
+    def test_user_can_add_product_to_basket(self, browser):
+        link = "http://selenium1py.pythonanywhere.com/en-gb/catalogue/the-shellcoders-handbook_209/?promo=newYear"
+        page = ProductPage(browser, link)
+        page.open()
+        page.add_product_to_basket()
+        page.solve_quiz_and_get_code()
+        main_product_name = page.get_main_product_name()
+        main_product_price = page.get_main_product_price()
+        alert_product_name = page.get_alert_product_name()
+        alert_product_price = page.get_alert_product_price()
+        assert main_product_name == alert_product_name, f'Main page name {main_product_name} is nor equal to alert name {alert_product_name}'
+        assert main_product_price == alert_product_price, f'Main page price {main_product_price} is nor equal to alert price {alert_product_price}'
