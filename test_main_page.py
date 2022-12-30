@@ -1,3 +1,4 @@
+import allure
 import pytest
 from selenium.webdriver.common.by import By
 
@@ -7,6 +8,8 @@ from .pages.main_page import MainPage
 
 @pytest.mark.login_guest
 class TestLoginFromMainPage:
+    @allure.title("Guest can go to login page")
+    @allure.link('https://www.youtube.com/watch?v=4YYzUTYZRMU')
     def test_guest_can_go_to_login_page(self, browser):
         link = "http://selenium1py.pythonanywhere.com"
         page = MainPage(browser, link)
@@ -15,6 +18,7 @@ class TestLoginFromMainPage:
         login_page = LoginPage(browser, browser.current_url)
         login_page.should_be_login_page()
 
+    @allure.testcase("http://selenium1py.pythonanywhere.com", 'Test case title')
     def test_guest_should_see_login_link(self, browser):
         link = "http://selenium1py.pythonanywhere.com/"
         page = MainPage(browser, link)
