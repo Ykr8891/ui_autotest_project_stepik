@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 
 
 class BasePageLocators:
+    USERNAME_FIELD = None
     LOGIN_LINK = (By.CSS_SELECTOR, "#login_link")
     LOGIN_LINK_INVALID = (By.CSS_SELECTOR, "#login_link_inc")
     BASKET_PAGE_LINK = (By.XPATH, "//span/a[contains(text(),'View basket')]")

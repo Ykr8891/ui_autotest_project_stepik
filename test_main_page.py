@@ -1,7 +1,7 @@
 import allure
 import pytest
-from selenium.webdriver.common.by import By
 
+from .pages.basket_page import BasketPage
 from .pages.login_page import LoginPage
 from .pages.main_page import MainPage
 
@@ -31,5 +31,5 @@ def test_guest_cant_see_product_in_basket_opened_from_main_page(browser):
     page = MainPage(browser, link)
     page.open()
     page.go_to_basket_page()
-    assert page.is_not_element_present(By.CLASS_NAME, "basket-items"), "Basket is not empty"
-    assert page.is_element_present(By.XPATH, "//*[text()[contains(., 'Your basket is empty.')]]"), '"Your basket is empty" text is not present'
+    page = BasketPage(browser, browser.current_url)
+    page.basket_should_be_empty()
